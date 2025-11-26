@@ -1,0 +1,32 @@
+# Go
+bin/
+dist/
+*.exe
+*.dll
+*.so
+vendor/
+test.out
+
+# Environment
+.env
+.env.*
+
+# SQLC Generated Code
+internal/adapters/postgresql/sqlc/*.go
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.dockerenv
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Build artifacts
+build/

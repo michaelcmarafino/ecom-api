@@ -3,7 +3,9 @@ package products
 import (
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi"
 	"github.com/michaelcmarafino/ecom/internal/json"
 )
 
@@ -19,7 +21,7 @@ func NewHandler(service Service) *handler {
 
 func (h *handler) ListProducts(w http.ResponseWriter, r *http.Request) {
 	// 1. Call the service -> ListProducts
-	err := h.service.ListProducts(r.Context())
+	products, err := h.service.ListProducts(r.Context())
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -27,10 +29,28 @@ func (h *handler) ListProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 2. return JSON in an HTTP response
-
-	products := struct {
-		Products []string `json:"products"`
-	}{}
-
 	json.Write(w, http.StatusOK, products)
+}
+
+func (h *handler) FindProductByID(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	if idStr == "" {
+		http.Error(w, "Missing 'id' parameter", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	product, err := h.service.FindProductByID(r.Context(), id)
+	if err != nil {
+		log.Println("Error finding product: ", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	json.Write(w, http.StatusOK, product)
 }
